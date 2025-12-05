@@ -134,20 +134,23 @@ See: [NVIDIA 570 driver install](<./NVIDIA-570-driver-install.md>)
 #### GITHUB
 
 - Generate user key `ssh-keygen -t ed25519 -C "juanpablo.jofre@live.com" -f jp_github`
-- Add key to key-agent `ssh-add ~/.ssh/jp_github`
-- Add public key to Github user keys, see: [](<https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account?platform=linux&tool=webui>)
+- Add key to key-agent:
+  - Edit `.bashrc` and add:
+    - `eval "$(ssh-agent -s)"`
+    - `ssh-add ~/.ssh/jp_github`
+- Add public key to Github user keys, see: [Adding a new SSH key to your GitHub account](<https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account?platform=linux&tool=webui>)
 - Test SSH Key access: `ssh -T git@github.com`
 
 #### VS Code
 
 - Download [.deb package (64-bit)](<https://go.microsoft.com/fwlink/?LinkID=760868>)
-- `sudo apt install ./<file>.deb` 
+- `sudo apt install ./<file>.deb`
 
 ### 5th. Containarization
 
 - `sudo apt-get -y install podman`
 - test installation: 
-  - `podman build -t hello https://github.com/containers/PodmanHello.git` 
+  - `podman build -t hello https://github.com/containers/PodmanHello.git`
   - `podman run -it hello`
 
 ### 6th. PostgreSql, PGAdmin, and PGVector
