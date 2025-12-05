@@ -26,44 +26,136 @@ from USB
 
 ## Install Software
 
-### Install SSH Server
+> ⚠️***WARNING***⚠️: Don't run `sudo apt upgrade -y` until all NVIDIA and CUDA
+drivers are installed, and a `hold` is placed on them.
 
+### 1st. Install SSH Server and disable sleep modes
 
-### 1st. NVIDIA 570 and CUDA 12.8
+#### SSH server
 
-This is the last driver made native with nvcc 12.8; which makes it the optimal 
+```sh
+    sudo apt update
+    sudo apt install openssh-server
+    sudo systemctl enable ssh
+```
+
+#### Disable sleep modes
+
+```bash
+    sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+    sudo powerprofilesctl set performance
+    
+    # Reboot to make system changes available
+    sudo reboot now
+```
+
+### 2nd Enable Windows RDP access
+
+- steps:
+
+```bash
+sudo apt update
+# Install xrdp
+sudo apt install -y xrdp
+
+# Install XFCE
+sudo apt install -y xfce4 xfcd4-goodies
+
+# If asked about package manager (`gdm3` or `lightdm`)
+# Choose `lightdm`
+
+echo "startxfce4" > ~/.xsession
+
+# Force presentation mode in XFCE (aka no-sleep, no-suspend, etc.) for all users
+# --> remote sessions should not hang-out on anyone
+xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/presentation-mode -T
+sudo cp ~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/
+sudo chown root:root /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml
+sudo chmod 644 /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml
+
+# Configure the firewall, if active
+sudo ufw status
+# sudo ufw allow 3389
+# sudo ufw reload
+
+# Start and enable xrdp
+sudo systemctl enable xrdp
+sudo systemctl start xrdp
+
+# Reboot
+sudo reboot now
+```
+
+### 3rd. NVIDIA 570 and CUDA 12.8
+
+This is the last driver made native with nvcc 12.8; which makes it the optimal
 one to be installed for the current GPU card: RTX 4060 Ti.
 
-See: [NVIDIA 570 driver install](./NVIDIA-570-driver-install.md)
+See: [NVIDIA 570 driver install](<./NVIDIA-570-driver-install.md>)
 
-### 2nd. Conda-Forge, GIT, and VS Code
+### 4th. Conda-Forge, GIT, GITHUB, and VS Code
+
+#### Connect DATA disk
+
+- Using `Disks` gui-app, mount DATA disk under `/mnt/data`
+- Create links to access DATA folders
+
+```sh
+    sudo ln -s /mnt/data/developers /developers
+    sudo ln -s /mnt/data/learning /learning
+    sudo ln -s /mnt/data/medusa /medusa
+    sudo ln -s /mnt/data/models /models
+    sudo ln -s /mnt/data/nltk_data /nltk_data
+    sudo ln -s /mnt/data/repos /repos
+    sudo ln -s /mnt/data/sample_data /sample_data
+    sudo ln -s /mnt/data/shared /shared
+    sudo chown -Rv jp:jp /mnt/data/{developers,learning,medusa,models,nltk_data,repos,sample_data,shared}
+    sudo chmod -Rv 770 /mnt/data/{developers,learning,medusa,models,nltk_data,repos,sample_data,shared}
+```
+
+#### Global config download areas for AI frameworks
+
+- Add `NLTK_DATA=/nltk` to `/etc/environment`
+- Add `HF_HOME=/models/huggingface` to `/etc/environment`
+
+#### Conda
 
 - See [conda-forge downloads](https://conda-forge.org/download/)
   - From a browser select the correct installer and download it
   - from terminal, in the same folder the downloaded file is: `bash Miniforge3-$(uname)-$(uname -m).sh`
 
-- GIT
-  - `sudo apt update`
-  - `sudo apt install -y git`
-  
-- VS Code
-  - Download [.deb package (64-bit)](https://go.microsoft.com/fwlink/?LinkID=760868)
-  - `sudo apt install ./<file>.deb` 
+#### GIT
 
-### 3rd Containarization
+- `sudo apt update`
+- `sudo apt install -y git`
+
+#### GITHUB
+
+- Generate user key `ssh-keygen -t ed25519 -C "juanpablo.jofre@live.com" -f jp_github`
+- Add key to key-agent `ssh-add ~/.ssh/jp_github`
+- Add public key to Github user keys, see: [](<https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account?platform=linux&tool=webui>)
+- Test SSH Key access: `ssh -T git@github.com`
+
+#### VS Code
+
+- Download [.deb package (64-bit)](<https://go.microsoft.com/fwlink/?LinkID=760868>)
+- `sudo apt install ./<file>.deb` 
+
+### 5th. Containarization
 
 - `sudo apt-get -y install podman`
 - test installation: 
   - `podman build -t hello https://github.com/containers/PodmanHello.git` 
   - `podman run -it hello`
 
+### 6th. PostgreSql, PGAdmin, and PGVector
 
-### 4th PostgreSql, PGAdmin, and PGVector
+#### PostgreSql Server
 
-- reference: [Install PostgreSQL](https://documentation.ubuntu.com/server/how-to/databases/install-postgresql/)
+- reference: [Install PostgreSQL](<https://documentation.ubuntu.com/server/how-to/databases/install-postgresql/>)
 
   - steps:
-    - `sudo apt install postgresql` 
+    - `sudo apt -y install postgresql` 
     - edit: `/etc/postgresql/16/main/postgresql.conf`
       - locate and change: `#listen_addresses = 'localhost'` for `listen_addresses = '*'`
     - edit: `/etc/postgresql/16/main/pg_hba.conf`
@@ -73,11 +165,19 @@ See: [NVIDIA 570 driver install](./NVIDIA-570-driver-install.md)
       - `ALTER USER postgres with encrypted password 'your_password';`
     - restart service
       - `sudo systemctl restart postgresql.service`
-      
-- reference: [PGAdmin setup](https://www.pgadmin.org/download/pgadmin-4-apt/) 
 
-  - steps:
+#### Postgresql Client (mostly needed for python access to DB)
+
+- `sudo apt -y install postgresql-client`
+
+#### PGAdmin
+
+> reference: [PGAdmin setup](<https://www.pgadmin.org/download/pgadmin-4-apt/>) 
+
+##### steps
+
 ```bash
+    sudo apt-get -y install curl
     # Install the public key for the repository (if not done previously):
     curl -fsS https://www.pgadmin.org/static/packages_pgadmin_org.pub | sudo gpg --dearmor -o /usr/share/keyrings/packages-pgadmin-org.gpg
 
@@ -89,29 +189,21 @@ See: [NVIDIA 570 driver install](./NVIDIA-570-driver-install.md)
     #
 
     # Install for both desktop and web modes:
-    sudo apt install pgadmin4
+    sudo apt -y install pgadmin4
 ```
 
-### 5th Enable Windows RDP access
+#### PGVector
 
-- steps:
+> reference: [PGVector install](<https://github.com/pgvector/pgvector?tab=readme-ov-file#apt>)
 
-```bash
-sudo apt update
-# Install xrdp
-sudo apt install -y xrdp
+##### Install package
 
-# Configure the firewall
-sudo ufw allow 3389
-sudo ufw reload
+```sh
+sudo apt install postgresql-16-pgvector
+```
 
-# Start and enable xrdp
-sudo systemctl enable xrdp
-sudo systemctl start xrdp
+##### Enable PGVector in desired Database
 
-``` 
+> ⚠️***WARNING***⚠️: Needs to be done in each database where vector searches are desired
 
-
-
-
-
+- [Getting Started](<https://github.com/pgvector/pgvector#getting-started>)

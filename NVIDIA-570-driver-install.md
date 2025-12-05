@@ -9,7 +9,7 @@ sudo apt install nvidia-driver-570
 sudo apt-mark hold nvidia-driver-570
 ```
 
-## Reboot
+***Reboot***
 
 ## Install CUDA Toolkit 12.8
 
@@ -24,29 +24,44 @@ sudo cp /var/cuda-repo-ubuntu2404-12-8-local/cuda-*-keyring.gpg /usr/share/keyri
 sudo apt-get update
 
 sudo apt-get -y install cuda-toolkit-12-8
+sudo apt-mark hold cuda-toolkit-12-8
 ```
 
-## NVIDIA 570 and CUDA 12.8
+## Make CUDA 12.8 available
 
 - Add to `.bashrc`
 
+```txt
     export PATH=${PATH}:/usr/local/cuda-12.8/bin
-    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/cuda-13.0/lib64
+    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/cuda-12.8/lib64
+```
 
-## Reboot
+***Reboot***
 
-## Install cuDNN 
+## Install cuDNN
 
-```bash 
+```bash
 wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
 sudo dpkg -i cuda-keyring_1.1-1_all.deb
 sudo apt-get update
 sudo apt-get -y install cudnn9-cuda-12
 
 sudo apt -y autoremove
+sudo apt-mark hold cudnn9-cuda-12
+```
+
+### Check cuDNN
+
+```bash
+sudo apt-get -y install libcudnn9-samples
+sudo apt-get - install libfreeimage3 libfreeimage-dev
+mkdir -p ~/samples/cudnn_samples_v9/mnistCUDNN
+cp -v /usr/src/cudnn_samples_v9/mnistCUDNN/* $HOME/samples/cudnn_samples_v9/mnistCUDNN
+cd $HOME/samples/cudnn_samples_v9/mnistCUDNN
+make clean && make
+./mnistCUDNN
 ```
 
 ## Hold packages
 
-`sudo apt-mark hold $(dpkg -l | egrep -i 'cuda|nvidia' | egrep 'meta-?package' | awk '{print $2 }')`
-
+`sudo apt-mark hold $(dpkg -l | egrep -i 'cuda|nvidia|cudnn9' | egrep 'meta-?package' | awk '{print $2 }')`
