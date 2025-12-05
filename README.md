@@ -128,6 +128,8 @@ See: [NVIDIA 570 driver install](<./NVIDIA-570-driver-install.md>)
 
 - `sudo apt update`
 - `sudo apt install -y git`
+- `git config --global user.email "juanpablo.jofre@live.com"`
+- `git config --global user.name "Juan Pablo 'JP' Jofre @ xps-8950"`
 
 #### GITHUB
 
