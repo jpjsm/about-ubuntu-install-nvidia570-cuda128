@@ -4,7 +4,7 @@ With AI and ML in mind, the setup of this machine is geared towards
 Pyhton and GPU (CUDA) usage.
 
 Most AI chains use pythorch or tensorflow, either at top level or bottom
-level; and for those purposes CUDA 12.8 is the most common and tested 
+level; and for those purposes CUDA 12.8 is the most common and tested
 version, and the one that works for most Python libraries.
 
 ## Install Ubuntu
@@ -16,18 +16,27 @@ version, and the one that works for most Python libraries.
 1. Search for the function key that needs to be pressed to allow to boot
 from USB
 
+    - For Dell XPS-8950: press [F12]
+
 1. Insert USB drive in computer, turn-on, and press the key to select USB drive
 
 1. Follow instructions on screen
 
 1. Check computer boots correctly
 
+    - > ⚠️***WARNING***⚠️: Don't run `sudo apt upgrade -y` until all NVIDIA and
+        CUDA   drivers are installed, and a `hold` is placed on them.
+    - > ⚠️***WARNING***⚠️: Disable all automatic updates !!
+        - > To avoid NVIDIA drivers to be updated
+        - > Only security updates are to be allowed
+    - Uninstall the Unattended-Upgrades Package: `sudo apt remove unattended-upgrades`
+    - Check Unattended-Upgrades is removed: `sudo systemctl status unattended-upgrades`
+
 1. Install GPU
 
-## Install Software
+1. Check computer boots correctly *(again)*
 
-> ⚠️***WARNING***⚠️: Don't run `sudo apt upgrade -y` until all NVIDIA and CUDA
-drivers are installed, and a `hold` is placed on them.
+## Install Software
 
 ### 1st. Install SSH Server and disable sleep modes
 
@@ -44,7 +53,7 @@ drivers are installed, and a `hold` is placed on them.
 ```bash
     sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
     sudo powerprofilesctl set performance
-    
+
     # Reboot to make system changes available
     sudo reboot now
 ```
@@ -93,7 +102,7 @@ one to be installed for the current GPU card: RTX 4060 Ti.
 
 See: [NVIDIA 570 driver install](<./NVIDIA-570-driver-install.md>)
 
-### 4th. Conda-Forge, GIT, GITHUB, and VS Code
+### 4th. Data disk and global configs
 
 #### Connect DATA disk
 
@@ -117,6 +126,8 @@ See: [NVIDIA 570 driver install](<./NVIDIA-570-driver-install.md>)
 
 - Add `NLTK_DATA=/nltk` to `/etc/environment`
 - Add `HF_HOME=/models/huggingface` to `/etc/environment`
+
+### 5th. Conda-Forge, GIT, GITHUB, and VS Code
 
 #### Conda
 
@@ -149,7 +160,7 @@ See: [NVIDIA 570 driver install](<./NVIDIA-570-driver-install.md>)
 ### 5th. Containarization
 
 - `sudo apt-get -y install podman`
-- test installation: 
+- test installation:
   - `podman build -t hello https://github.com/containers/PodmanHello.git`
   - `podman run -it hello`
 
@@ -160,7 +171,7 @@ See: [NVIDIA 570 driver install](<./NVIDIA-570-driver-install.md>)
 - reference: [Install PostgreSQL](<https://documentation.ubuntu.com/server/how-to/databases/install-postgresql/>)
 
   - steps:
-    - `sudo apt -y install postgresql` 
+    - `sudo apt -y install postgresql`
     - edit: `/etc/postgresql/16/main/postgresql.conf`
       - locate and change: `#listen_addresses = 'localhost'` for `listen_addresses = '*'`
     - edit: `/etc/postgresql/16/main/pg_hba.conf`
@@ -177,7 +188,7 @@ See: [NVIDIA 570 driver install](<./NVIDIA-570-driver-install.md>)
 
 #### PGAdmin
 
-> reference: [PGAdmin setup](<https://www.pgadmin.org/download/pgadmin-4-apt/>) 
+> reference: [PGAdmin setup](<https://www.pgadmin.org/download/pgadmin-4-apt/>)
 
 ##### steps
 
@@ -212,3 +223,5 @@ sudo apt install postgresql-16-pgvector
 > ⚠️***WARNING***⚠️: Needs to be done in each database where vector searches are desired
 
 - [Getting Started](<https://github.com/pgvector/pgvector#getting-started>)
+
+### 7th. EXIF tool
